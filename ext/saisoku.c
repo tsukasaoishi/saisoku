@@ -15,6 +15,7 @@ node initialize_node(char moji)
 
     work->moji = moji;
     work->replacement = NULL;
+    work->replacement_length = (size_t)0UL;
     work->child_head = NULL;
     work->next = NULL;
 
@@ -138,6 +139,7 @@ static VALUE t_set_match_and_replacement(VALUE self, VALUE match, VALUE replace_
     }
 
     now->replacement = replacement;
+    now->replacement_length = strlen(replacement);
 
     return Qtrue;
 }
@@ -151,6 +153,7 @@ static VALUE t_replace(VALUE self, VALUE str)
     char *text;
     char *replacement;
     int i, head_i, tail_i, copy_head_i, total_len;
+    size_t replacement_length;
     VALUE change_str;
     
     change_str = rb_str_new2(EMPTY_STRING);
@@ -159,7 +162,7 @@ static VALUE t_replace(VALUE self, VALUE str)
     Data_Get_Struct(self, struct _node, root);
 
     now = root;
-    total_len = strlen(text);
+    total_len = (int)strlen(text);
     head_i = -1;
     tail_i = -1;
     copy_head_i = 0;
@@ -176,15 +179,16 @@ static VALUE t_replace(VALUE self, VALUE str)
             if (ret->replacement) {
                 tail_i = i;
                 replacement = ret->replacement;
+                replacement_length = ret->replacement_length;
             }
             now = ret;
         } else {
             if (head_i != -1) {
                 if (tail_i != -1) {
                     if (copy_head_i < head_i) {
-                        rb_funcall(change_str, rb_intern("concat"), 1, rb_str_new(&text[copy_head_i], (head_i - copy_head_i)));
+                        rb_str_cat(change_str, &text[copy_head_i], (head_i - copy_head_i));
                     }
-                    rb_funcall(change_str, rb_intern("concat"), 1, rb_str_new(replacement, strlen(replacement)));
+                    rb_str_cat(change_str, replacement, replacement_length);
                     i = tail_i;
                     copy_head_i = tail_i + 1;
                     tail_i = -1;
@@ -201,7 +205,7 @@ static VALUE t_replace(VALUE self, VALUE str)
     if (copy_head_i == 0) {
         return str;
     } else {
-        rb_funcall(change_str, rb_intern("concat"), 1, rb_str_new(&text[copy_head_i], (total_len - copy_head_i)));
+        rb_str_cat(change_str, &text[copy_head_i], (total_len - copy_head_i));
         return change_str;
     }
 }

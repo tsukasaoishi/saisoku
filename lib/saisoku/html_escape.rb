@@ -5,16 +5,16 @@ class Saisoku
 
       def escape(str)
         if str.respond_to?("html_safe?")
-          str.html_safe? ? str.to_s : saisoku.replace(str.to_s).html_safe
+          str.html_safe? ? str.to_s.html_safe : index.replace(str.to_s).html_safe
         else
-          saisoku.replcae(str.to_s).html_safe
+          index.replace(str.to_s)
         end
       end
 
       private
 
-      def saisoku
-        @saisoku ||= ::Saisoku.new(HTML_ESCAPE)
+      def index
+        @index ||= ::Saisoku.new(HTML_ESCAPE)
       end
     end
   end

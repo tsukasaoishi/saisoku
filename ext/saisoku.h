@@ -9,6 +9,7 @@
 typedef struct _node {
     char    moji;               // character
     char    *replacement;       // if NULL, not terminal. else replace string
+    size_t  replacement_length;
 
     struct _node    *child_head;// head of child list
     struct _node    *next;      // pointer of sibling node
