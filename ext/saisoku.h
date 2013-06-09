@@ -36,10 +36,10 @@ void destroy_node(node);
 // ----------------------------------------------------------
 
 // new
-static VALUE t_new(int, VALUE *, VALUE);
+static VALUE t_new(int, VALUE*, VALUE);
 
-// add
-static VALUE t_add(VALUE, VALUE);
+// set_metch_and_replacement
+static VALUE t_set_match_and_replacement(VALUE, VALUE, VALUE);
 
 // replace
 static VALUE t_replace(VALUE, VALUE);

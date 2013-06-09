@@ -1,3 +1,3 @@
-module Saisoku
+class Saisoku
   VERSION = "0.0.1"
 end

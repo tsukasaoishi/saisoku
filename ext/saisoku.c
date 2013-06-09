@@ -64,7 +64,6 @@ node search_child_or_create(node n, char moji)
 // free memory all child and self
 void destroy_node(node n)
 {
-    int i;
     node now, next;
 
     now = n->child_head;
@@ -74,11 +73,12 @@ void destroy_node(node n)
         now = next;
     }
 
-    if(n->replace_string) {
-      free(n->replace_string)
+    if(n->replacement) {
+      free(n->replacement);
     }
     free(n);
 }
+
 
 //-----------------------------------------------------------
 // Ruby Methods
@@ -90,32 +90,27 @@ void destroy_node(node n)
 static VALUE t_new(int argc, VALUE *argv, VALUE klass)
 {
     node root;
-    VALUE obj, hash, array, match, replace_str;
+    VALUE obj;
 
     root = initialize_node(NULL_CHAR);
 
     obj = Data_Make_Struct(klass, struct _node, NULL, destroy_node, root);
 
     if (argc == 1) {
-        hash = argv[0];
-        while((array = rb_hash_shift(argv[0])) != Qnil) {
-            match = rb_array_shift(array);
-            replace_str = rb_array_shift(array);
-            t_add(obj, match, replace_str);
-        }
+      rb_funcall(obj, rb_intern("add"), 1, argv[0]);
     }
-
+    
     return obj;
 }
 
 /**
- * add
+ * set keyword and replacement
  **/
-static VALUE t_add(VALUE self, VALUE match, VALUE replace_str)
+static VALUE t_set_match_and_replacement(VALUE self, VALUE match, VALUE replace_str)
 {
     node root, now;
     char *keyword, *work, *replacement;
-    int i, len;
+    size_t i, len;
 
     keyword = StringValuePtr(match);
     work = StringValuePtr(replace_str);
@@ -136,15 +131,15 @@ static VALUE t_add(VALUE self, VALUE match, VALUE replace_str)
     }
 
     Data_Get_Struct(self, struct _node, root);
-    now = root;
 
+    now = root;
     for(i = 0; i < len; i++) {
         now = search_child_or_create(now, keyword[i]);
     }
 
     now->replacement = replacement;
 
-    return str;
+    return Qtrue;
 }
 
 /**
@@ -219,7 +214,6 @@ void Init_saisoku() {
 
     cSaisoku = rb_define_class("Saisoku", rb_cObject);
     rb_define_singleton_method(cSaisoku, "new", t_new, -1);
-    rb_define_method(cSaisoku, "add", t_add, 1);
+    rb_define_method(cSaisoku, "set_match_and_replacement", t_set_match_and_replacement, 2);
     rb_define_method(cSaisoku, "replace", t_replace, 1);
-    rb_define_alias(cSaisoku, "<<", "add");
 }
